@@ -1,0 +1,547 @@
+﻿Year,Fishery,Stock,Comp
+2005,Central District Drift,Kenai,0.866
+2005,Central District Drift,Kasilof,0.072
+2005,Central District Drift,KTNE,0.006
+2005,Central District Drift,Fish Creek,0.002
+2005,Central District Drift,Susitna,0.026
+2005,Central District Drift,West,0.02
+2005,Central District Drift,Crescent,0.009
+2005,ESSN,Kenai,0.624
+2005,ESSN,Kasilof,0.368
+2005,ESSN,KTNE,0.002
+2005,ESSN,Fish Creek,0
+2005,ESSN,Susitna,0.005
+2005,ESSN,West,0
+2005,ESSN,Crescent,0
+2006,Central District Drift,Kenai,0.517
+2006,Central District Drift,Kasilof,0.296
+2006,Central District Drift,KTNE,0.019
+2006,Central District Drift,Fish Creek,0
+2006,Central District Drift,Susitna,0.099
+2006,Central District Drift,West,0.069
+2006,Central District Drift,Crescent,0
+2006,ESSN,Kenai,0.351
+2006,ESSN,Kasilof,0.634
+2006,ESSN,KTNE,0.006
+2006,ESSN,Fish Creek,0
+2006,ESSN,Susitna,0.002
+2006,ESSN,West,0.006
+2006,ESSN,Crescent,0.001
+2006,Northern District,Kasilof,0.172
+2006,Northern District,Kenai,0.389
+2006,Northern District,KTNE,0.187
+2006,Northern District,Fish Creek,0.011
+2006,Northern District,Susitna,0.184
+2006,Northern District,West,0.056
+2006,Northern District,Crescent,0
+2006,Westside,Kenai,0.154
+2006,Westside,Kasilof,0.115
+2006,Westside,KTNE,0.031
+2006,Westside,Fish Creek,0
+2006,Westside,Susitna,0.044
+2006,Westside,West,0.265
+2006,Westside,Crescent,0.39
+2007,Central District Drift,Kenai,0.647
+2007,Central District Drift,Kasilof,0.161
+2007,Central District Drift,KTNE,0.028
+2007,Central District Drift,Fish Creek,0.004
+2007,Central District Drift,Susitna,0.109
+2007,Central District Drift,West,0.044
+2007,Central District Drift,Crescent,0.008
+2007,ESSN,Kenai,0.603
+2007,ESSN,Kasilof,0.303
+2007,ESSN,KTNE,0.02
+2007,ESSN,Fish Creek,0.001
+2007,ESSN,Susitna,0.039
+2007,ESSN,West,0.032
+2007,ESSN,Crescent,0.002
+2007,Northern District,Kenai,0.578
+2007,Northern District,Kasilof,0.052
+2007,Northern District,KTNE,0.184
+2007,Northern District,Fish Creek,0.007
+2007,Northern District,Susitna,0.137
+2007,Northern District,West,0.016
+2007,Northern District,Crescent,0.027
+2007,Westside,Kenai,0.181
+2007,Westside,Kasilof,0.082
+2007,Westside,KTNE,0.009
+2007,Westside,Fish Creek,0.001
+2007,Westside,Susitna,0.025
+2007,Westside,West,0.339
+2007,Westside,Crescent,0.362
+2008,Central District Drift,Kenai,0.472
+2008,Central District Drift,Kasilof,0.345
+2008,Central District Drift,KTNE,0.028
+2008,Central District Drift,Fish Creek,0.002
+2008,Central District Drift,Susitna,0.117
+2008,Central District Drift,West,0.031
+2008,Central District Drift,Crescent,0.005
+2008,ESSN,Kenai,0.333
+2008,ESSN,Kasilof,0.607
+2008,ESSN,KTNE,0.019
+2008,ESSN,Fish Creek,0.001
+2008,ESSN,Susitna,0.026
+2008,ESSN,West,0.008
+2008,ESSN,Crescent,0.006
+2008,Northern District,Kenai,0.117
+2008,Northern District,Kasilof,0.061
+2008,Northern District,KTNE,0.4
+2008,Northern District,Fish Creek,0.066
+2008,Northern District,Susitna,0.259
+2008,Northern District,West,0.095
+2008,Northern District,Crescent,0.002
+2008,Westside,Kenai,0.096
+2008,Westside,Kasilof,0.114
+2008,Westside,KTNE,0.105
+2008,Westside,Fish Creek,0
+2008,Westside,Susitna,0.014
+2008,Westside,West,0.452
+2008,Westside,Crescent,0.219
+2009,Central District Drift,Kenai,0.595
+2009,Central District Drift,Kasilof,0.158
+2009,Central District Drift,KTNE,0.028
+2009,Central District Drift,Fish Creek,0.019
+2009,Central District Drift,Susitna,0.088
+2009,Central District Drift,West,0.106
+2009,Central District Drift,Crescent,0.006
+2009,ESSN,Kenai,0.385
+2009,ESSN,Kasilof,0.558
+2009,ESSN,KTNE,0.02
+2009,ESSN,Fish Creek,0.013
+2009,ESSN,Susitna,0.012
+2009,ESSN,West,0.011
+2009,ESSN,Crescent,0.001
+2009,Northern District,Kenai,0.104
+2009,Northern District,Kasilof,0.041
+2009,Northern District,KTNE,0.215
+2009,Northern District,Fish Creek,0.193
+2009,Northern District,Susitna,0.173
+2009,Northern District,West,0.274
+2009,Northern District,Crescent,0
+2009,Westside,Kenai,0.162
+2009,Westside,Kasilof,0.09
+2009,Westside,KTNE,0.004
+2009,Westside,Fish Creek,0.001
+2009,Westside,Susitna,0.002
+2009,Westside,West,0.321
+2009,Westside,Crescent,0.421
+2010,Central District Drift,Kenai,0.71
+2010,Central District Drift,Kasilof,0.077
+2010,Central District Drift,KTNE,0.029
+2010,Central District Drift,Fish Creek,0.039
+2010,Central District Drift,Susitna,0.06
+2010,Central District Drift,West,0.079
+2010,Central District Drift,Crescent,0.006
+2010,ESSN,Kenai,0.638
+2010,ESSN,Kasilof,0.274
+2010,ESSN,KTNE,0.024
+2010,ESSN,Fish Creek,0.02
+2010,ESSN,Susitna,0.013
+2010,ESSN,West,0.029
+2010,ESSN,Crescent,0.001
+2010,Northern District,Kenai,0.091
+2010,Northern District,Kasilof,0.003
+2010,Northern District,KTNE,0.2
+2010,Northern District,Fish Creek,0.305
+2010,Northern District,Susitna,0.155
+2010,Northern District,West,0.247
+2010,Northern District,Crescent,0
+2010,Westside,Kenai,0.183
+2010,Westside,Kasilof,0.047
+2010,Westside,KTNE,0.004
+2010,Westside,Fish Creek,0.007
+2010,Westside,Susitna,0.009
+2010,Westside,West,0.381
+2010,Westside,Crescent,0.37
+2011,Central District Drift,Kenai,0.776
+2011,Central District Drift,Kasilof,0.051
+2011,Central District Drift,KTNE,0.018
+2011,Central District Drift,Fish Creek,0.019
+2011,Central District Drift,Susitna,0.06
+2011,Central District Drift,West,0.073
+2011,Central District Drift,Crescent,0.002
+2011,ESSN,Kenai,0.797
+2011,ESSN,Kasilof,0.165
+2011,ESSN,KTNE,0.012
+2011,ESSN,Fish Creek,0.008
+2011,ESSN,Susitna,0.012
+2011,ESSN,West,0.007
+2011,ESSN,Crescent,0
+2011,Northern District,Kenai,0.075
+2011,Northern District,Kasilof,0.003
+2011,Northern District,KTNE,0.172
+2011,Northern District,Fish Creek,0.24
+2011,Northern District,Susitna,0.336
+2011,Northern District,West,0.174
+2011,Northern District,Crescent,0.001
+2011,Westside,Kenai,0.258
+2011,Westside,Kasilof,0.032
+2011,Westside,KTNE,0.006
+2011,Westside,Fish Creek,0
+2011,Westside,Susitna,0.013
+2011,Westside,West,0.343
+2011,Westside,Crescent,0.347
+2012,Central District Drift,Kenai,0.84
+2012,Central District Drift,Kasilof,0.045
+2012,Central District Drift,KTNE,0.012
+2012,Central District Drift,Fish Creek,0.006
+2012,Central District Drift,Susitna,0.059
+2012,Central District Drift,West,0.036
+2012,Central District Drift,Crescent,0.002
+2012,ESSN,Kenai,0.597
+2012,ESSN,Kasilof,0.265
+2012,ESSN,KTNE,0.042
+2012,ESSN,Fish Creek,0.017
+2012,ESSN,Susitna,0.066
+2012,ESSN,West,0.014
+2012,ESSN,Crescent,0
+2012,Northern District,Kenai,0.252
+2012,Northern District,Kasilof,0.05
+2012,Northern District,KTNE,0.298
+2012,Northern District,Fish Creek,0.153
+2012,Northern District,Susitna,0.141
+2012,Northern District,West,0.105
+2012,Northern District,Crescent,0
+2012,Westside,Kenai,0.328
+2012,Westside,Kasilof,0.033
+2012,Westside,KTNE,0
+2012,Westside,Fish Creek,0
+2012,Westside,Susitna,0.009
+2012,Westside,West,0.362
+2012,Westside,Crescent,0.268
+2013,Central District Drift,Kenai,0.778
+2013,Central District Drift,Kasilof,0.058
+2013,Central District Drift,KTNE,0.013
+2013,Central District Drift,Fish Creek,0.001
+2013,Central District Drift,Susitna,0.078
+2013,Central District Drift,West,0.068
+2013,Central District Drift,Crescent,0.004
+2013,ESSN,Kenai,0.615
+2013,ESSN,Kasilof,0.275
+2013,ESSN,KTNE,0.033
+2013,ESSN,Fish Creek,0.002
+2013,ESSN,Susitna,0.064
+2013,ESSN,West,0.01
+2013,ESSN,Crescent,0.001
+2013,Northern District,Kenai,0.074
+2013,Northern District,Kasilof,0.011
+2013,Northern District,KTNE,0.245
+2013,Northern District,Fish Creek,0.037
+2013,Northern District,Susitna,0.251
+2013,Northern District,West,0.383
+2013,Northern District,Crescent,0
+2013,Westside,Kenai,0.149
+2013,Westside,Kasilof,0.098
+2013,Westside,KTNE,0.001
+2013,Westside,Fish Creek,0
+2013,Westside,Susitna,0.005
+2013,Westside,West,0.508
+2013,Westside,Crescent,0.239
+2014,Central District Drift,Kenai,0.705
+2014,Central District Drift,Kasilof,0.104
+2014,Central District Drift,KTNE,0.028
+2014,Central District Drift,Fish Creek,0.007
+2014,Central District Drift,Susitna,0.073
+2014,Central District Drift,West,0.073
+2014,Central District Drift,Crescent,0
+2014,ESSN,Kenai,0.666
+2014,ESSN,Kasilof,0.32
+2014,ESSN,KTNE,0.007
+2014,ESSN,Fish Creek,0
+2014,ESSN,Susitna,0.004
+2014,ESSN,West,0.003
+2014,ESSN,Crescent,0
+2014,Northern District,Kenai,0.112
+2014,Northern District,Kasilof,0.004
+2014,Northern District,KTNE,0.224
+2014,Northern District,Fish Creek,0.063
+2014,Northern District,Susitna,0.311
+2014,Northern District,West,0.286
+2014,Northern District,Crescent,0
+2014,Westside,Kenai,0.104
+2014,Westside,Kasilof,0.062
+2014,Westside,KTNE,0.001
+2014,Westside,Fish Creek,0.002
+2014,Westside,Susitna,0.044
+2014,Westside,West,0.373
+2014,Westside,Crescent,0.413
+2015,Central District Drift,Kenai,0.73
+2015,Central District Drift,Kasilof,0.054
+2015,Central District Drift,KTNE,0.017
+2015,Central District Drift,Fish Creek,0.001
+2015,Central District Drift,Susitna,0.12
+2015,Central District Drift,West,0.075
+2015,Central District Drift,Crescent,0.002
+2015,ESSN,Kenai,0.667
+2015,ESSN,Kasilof,0.268
+2015,ESSN,KTNE,0.009
+2015,ESSN,Fish Creek,0.008
+2015,ESSN,Susitna,0.044
+2015,ESSN,West,0.004
+2015,ESSN,Crescent,0
+2015,Northern District,Kenai,0.091
+2015,Northern District,Kasilof,0
+2015,Northern District,KTNE,0.149
+2015,Northern District,Fish Creek,0.1
+2015,Northern District,Susitna,0.39
+2015,Northern District,West,0.269
+2015,Northern District,Crescent,0
+2015,Westside,Kenai,0.171
+2015,Westside,Kasilof,0.054
+2015,Westside,KTNE,0.002
+2015,Westside,Fish Creek,0
+2015,Westside,Susitna,0.02
+2015,Westside,West,0.377
+2015,Westside,Crescent,0.377
+2016,Central District Drift,Kenai,0.889
+2016,Central District Drift,Kasilof,0.002
+2016,Central District Drift,KTNE,0.016
+2016,Central District Drift,Fish Creek,0.011
+2016,Central District Drift,Susitna,0.078
+2016,Central District Drift,West,0.003
+2016,Central District Drift,Crescent,0
+2016,ESSN,Kenai,0.824
+2016,ESSN,Kasilof,0.142
+2016,ESSN,KTNE,0.027
+2016,ESSN,Fish Creek,0
+2016,ESSN,Susitna,0.006
+2016,ESSN,West,0
+2016,ESSN,Crescent,0.001
+2016,Northern District,Kenai,0.202
+2016,Northern District,Kasilof,0.001
+2016,Northern District,KTNE,0.132
+2016,Northern District,Fish Creek,0.158
+2016,Northern District,Susitna,0.349
+2016,Northern District,West,0.158
+2016,Northern District,Crescent,0.001
+2016,Westside,Kenai,0.266
+2016,Westside,Kasilof,0.027
+2016,Westside,KTNE,0.003
+2016,Westside,Fish Creek,0.003
+2016,Westside,Susitna,0.062
+2016,Westside,West,0.254
+2016,Westside,Crescent,0.385
+2017,Central District Drift,Kenai,0.541
+2017,Central District Drift,Kasilof,0.105
+2017,Central District Drift,KTNE,0.035
+2017,Central District Drift,Fish Creek,0.023
+2017,Central District Drift,Susitna,0.125
+2017,Central District Drift,West,0.142
+2017,Central District Drift,Crescent,0.029
+2017,ESSN,Kenai,0.503
+2017,ESSN,Kasilof,0.289
+2017,ESSN,KTNE,0.03
+2017,ESSN,Fish Creek,0.037
+2017,ESSN,Susitna,0.08
+2017,ESSN,West,0.054
+2017,ESSN,Crescent,0.007
+2017,Northern District,Kenai,0.137
+2017,Northern District,Kasilof,0.007
+2017,Northern District,KTNE,0.23
+2017,Northern District,Fish Creek,0.218
+2017,Northern District,Susitna,0.19
+2017,Northern District,West,0.214
+2017,Northern District,Crescent,0.003
+2017,Westside,Kenai,0.215
+2017,Westside,Kasilof,0.023
+2017,Westside,KTNE,0.034
+2017,Westside,Fish Creek,0.006
+2017,Westside,Susitna,0.029
+2017,Westside,West,0.336
+2017,Westside,Crescent,0.357
+2018,Central District Drift,Kenai,0.471
+2018,Central District Drift,Kasilof,0.146
+2018,Central District Drift,KTNE,0.04
+2018,Central District Drift,Fish Creek,0.05
+2018,Central District Drift,Susitna,0.18
+2018,Central District Drift,West,0.11
+2018,Central District Drift,Crescent,0.003
+2018,ESSN,Kenai,0.416
+2018,ESSN,Kasilof,0.493
+2018,ESSN,KTNE,0.015
+2018,ESSN,Fish Creek,0.012
+2018,ESSN,Susitna,0.052
+2018,ESSN,West,0.009
+2018,ESSN,Crescent,0.003
+2018,Northern District,Kenai,0.076
+2018,Northern District,Kasilof,0.001
+2018,Northern District,KTNE,0.282
+2018,Northern District,Fish Creek,0.197
+2018,Northern District,Susitna,0.293
+2018,Northern District,West,0.143
+2018,Northern District,Crescent,0.008
+2018,Westside,Kenai,0.114
+2018,Westside,Kasilof,0.025
+2018,Westside,KTNE,0.01
+2018,Westside,Fish Creek,0.014
+2018,Westside,Susitna,0.031
+2018,Westside,West,0.315
+2018,Westside,Crescent,0.49
+2019,Central District Drift,Kenai,0.753
+2019,Central District Drift,Kasilof,0.029
+2019,Central District Drift,KTNE,0.023
+2019,Central District Drift,Fish Creek,0.002
+2019,Central District Drift,Susitna,0.072
+2019,Central District Drift,West,0.108
+2019,Central District Drift,Crescent,0.012
+2019,ESSN,Kenai,0.84
+2019,ESSN,Kasilof,0.122
+2019,ESSN,KTNE,0.01
+2019,ESSN,Fish Creek,0.004
+2019,ESSN,Susitna,0.007
+2019,ESSN,West,0.012
+2019,ESSN,Crescent,0.005
+2019,Northern District,Kenai,0.126
+2019,Northern District,Kasilof,0.037
+2019,Northern District,KTNE,0.182
+2019,Northern District,Fish Creek,0.063
+2019,Northern District,Susitna,0.199
+2019,Northern District,West,0.389
+2019,Northern District,Crescent,0.003
+2019,Westside,Kenai,0.155
+2019,Westside,Kasilof,0.005
+2019,Westside,KTNE,0.001
+2019,Westside,Fish Creek,0.001
+2019,Westside,Susitna,0.016
+2019,Westside,West,0.236
+2019,Westside,Crescent,0.586
+2020,Central District Drift,Kenai,0.72
+2020,Central District Drift,Kasilof,0.09
+2020,Central District Drift,KTNE,0.01
+2020,Central District Drift,Fish Creek,0.03
+2020,Central District Drift,Susitna,0.07
+2020,Central District Drift,West,0.07
+2020,Central District Drift,Crescent,0
+2020,ESSN,Kenai,0.5
+2020,ESSN,Kasilof,0.43
+2020,ESSN,KTNE,0.02
+2020,ESSN,Fish Creek,0.03
+2020,ESSN,Susitna,0.02
+2020,ESSN,West,0
+2020,ESSN,Crescent,0
+2020,Northern District,Kenai,0.064
+2020,Northern District,Kasilof,0.004
+2020,Northern District,KTNE,0.164
+2020,Northern District,Fish Creek,0.253
+2020,Northern District,Susitna,0.36
+2020,Northern District,West,0.155
+2020,Northern District,Crescent,0
+2020,Westside,Kenai,0.136
+2020,Westside,Kasilof,0.118
+2020,Westside,KTNE,0.009
+2020,Westside,Fish Creek,0.001
+2020,Westside,Susitna,0.004
+2020,Westside,West,0.279
+2020,Westside,Crescent,0.453
+2021,Central District Drift,Kenai,0.771
+2021,Central District Drift,Kasilof,0.064
+2021,Central District Drift,KTNE,0.013
+2021,Central District Drift,Fish Creek,0.01
+2021,Central District Drift,Susitna,0.063
+2021,Central District Drift,West,0.077
+2021,Central District Drift,Crescent,0.001
+2021,ESSN,Kenai,0.52
+2021,ESSN,Kasilof,0.45
+2021,ESSN,KTNE,0.01
+2021,ESSN,Fish Creek,0.01
+2021,ESSN,Susitna,0
+2021,ESSN,West,0.01
+2021,ESSN,Crescent,0
+2021,Northern District,Kenai,0.117
+2021,Northern District,Kasilof,0.008
+2021,Northern District,KTNE,0.19
+2021,Northern District,Fish Creek,0.153
+2021,Northern District,Susitna,0.262
+2021,Northern District,West,0.265
+2021,Northern District,Crescent,0.004
+2021,Westside,Kenai,0.27
+2021,Westside,Kasilof,0.1
+2021,Westside,KTNE,0
+2021,Westside,Fish Creek,0
+2021,Westside,Susitna,0.02
+2021,Westside,West,0.33
+2021,Westside,Crescent,0.28
+2022,Central District Drift,Kenai,0.618
+2022,Central District Drift,Kasilof,0.123
+2022,Central District Drift,KTNE,0.02
+2022,Central District Drift,Fish Creek,0.05
+2022,Central District Drift,Susitna,0.13
+2022,Central District Drift,West,0.05
+2022,Central District Drift,Crescent,0.01
+2022,ESSN,Kenai,0.219
+2022,ESSN,Kasilof,0.719
+2022,ESSN,KTNE,0.01
+2022,ESSN,Fish Creek,0.02
+2022,ESSN,Susitna,0.02
+2022,ESSN,West,0.01
+2022,ESSN,Crescent,0.01
+2022,Northern District,Kenai,0.05
+2022,Northern District,Kasilof,0.01
+2022,Northern District,KTNE,0.27
+2022,Northern District,Fish Creek,0.22
+2022,Northern District,Susitna,0.33
+2022,Northern District,West,0.12
+2022,Northern District,Crescent,0
+2022,Westside,Kenai,0.18
+2022,Westside,Kasilof,0.09
+2022,Westside,KTNE,0.01
+2022,Westside,Fish Creek,0.02
+2022,Westside,Susitna,0.06
+2022,Westside,West,0.4
+2022,Westside,Crescent,0.23
+2023,Central District Drift,Kenai,0.566
+2023,Central District Drift,Kasilof,0.114
+2023,Central District Drift,KTNE,0.029
+2023,Central District Drift,Fish Creek,0.019
+2023,Central District Drift,Susitna,0.155
+2023,Central District Drift,West,0.093
+2023,Central District Drift,Crescent,0.024
+2023,ESSN,Kenai,
+2023,ESSN,Kasilof,
+2023,ESSN,KTNE,
+2023,ESSN,Fish Creek,
+2023,ESSN,Susitna,
+2023,ESSN,West,
+2023,ESSN,Crescent,
+2023,Northern District,Kenai,0.103
+2023,Northern District,Kasilof,0.017
+2023,Northern District,KTNE,0.181
+2023,Northern District,Fish Creek,0.152
+2023,Northern District,Susitna,0.48
+2023,Northern District,West,0.065
+2023,Northern District,Crescent,0.002
+2023,Westside,Kenai,0.04
+2023,Westside,Kasilof,0.06
+2023,Westside,KTNE,0
+2023,Westside,Fish Creek,0
+2023,Westside,Susitna,0.13
+2023,Westside,West,0.16
+2023,Westside,Crescent,0.6
+2024,Central District Drift,Kenai,0.72
+2024,Central District Drift,Kasilof,0.05
+2024,Central District Drift,KTNE,0.01
+2024,Central District Drift,Fish Creek,0.01
+2024,Central District Drift,Susitna,0.07
+2024,Central District Drift,West,0.13
+2024,Central District Drift,Crescent,0.01
+2024,ESSN,Kenai,
+2024,ESSN,Kasilof,
+2024,ESSN,KTNE,
+2024,ESSN,Fish Creek,
+2024,ESSN,Susitna,
+2024,ESSN,West,
+2024,ESSN,Crescent,
+2024,Northern District,Kenai,0.1
+2024,Northern District,Kasilof,0.03
+2024,Northern District,KTNE,0.27
+2024,Northern District,Fish Creek,0.13
+2024,Northern District,Susitna,0.29
+2024,Northern District,West,0.17
+2024,Northern District,Crescent,0.01
+2024,Westside,Kenai,0.38
+2024,Westside,Kasilof,0.08
+2024,Westside,KTNE,0.03
+2024,Westside,Fish Creek,0.01
+2024,Westside,Susitna,0.06
+2024,Westside,West,0.38
+2024,Westside,Crescent,0.06
