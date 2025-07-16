@@ -534,6 +534,34 @@ Timing<-Sonar%>%
 
 
 
+TimingDesignation<-Sonar %>%
+  group_by(Year) %>%
+  mutate(Timing = cumsum(Daily.Count / sum(Daily.Count))) %>%
+  filter(Timing >= 0.5) %>%
+  slice_head(n = 1) %>%
+  ungroup() %>%
+  select(Year, Date) %>%
+  arrange(Year) %>%
+  mutate(
+    DateNum = as.numeric(Date),
+    RollingMeanDate = as.Date(
+      rollmean(DateNum, k = 10, align = "right", fill = NA),
+      origin = "1970-01-01"
+    )
+  ) %>%
+  filter(!is.na(RollingMeanDate)) %>%
+  mutate(
+    Timing = round(as.numeric(Date - RollingMeanDate), digits = 0),
+    TimingText = case_when(
+      Timing < 0 ~ paste0("early ", abs(Timing), " days"),
+      Timing > 0 ~ paste0("late ", Timing, " days"),
+      TRUE       ~ "on time"
+    )
+  )%>%
+  select(Year, TimingText)
+
+
+
 ########## Inseason Data ##############
 TRUnallocated<-Page1%>%
   filter(!Fishery.Project%in%c("Crescent Escapement", "Fish Creek Escapement", "Susitna Escapement", "Other", "Fish Creek Personal Use"))%>%
@@ -662,7 +690,7 @@ Page1%>%
 
 ### Total Run Projection
 
-The 2025 total run timing for late-run Kenai river stock sockeye salmon most closely resembling that of the `{r} Test.2.0$Year[1]`, `{r} Test.2.0$Year[2]`, `{r} Test.2.0$Year[3]` runs (@tbl-Projections; @fig-Projectioncurves). Current total run timing is estimated to be near `{r} percent((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%mutate(ProjectedTiming=Timing*Weight)%>%summarize(Time=sum(ProjectedTiming)))$Time)`, which yields a total run estimate of **`{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year))))$Total[1],big.mark=",", scientific=F)`** (`{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%mutate(MM=mean(MAAPE))%>%mutate(Lower=Total*(1-(MM/100)), Upper=Total*(1+(MM/100))))$Lower[1], big.mark=",", scientific = F)`-`{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%mutate(MM=mean(MAAPE))%>%mutate(Lower=Total*(1-(MM/100)), Upper=Total*(1+(MM/100))))$Upper[1], big.mark=",", scientific = F)`). Total run projection estimates have averaged `{r} format(mean((Projected.Daily%>%filter(Projection.Date>Yesterday-3))$Weighted.Projection), big.mark = ",", scientific = F)` fish over the last three days (@fig-Modelstability).
+The 2025 total run timing for late-run Kenai river stock sockeye salmon most closely resembling that of the `{r} Test.2.0$Year[1]`, `{r} Test.2.0$Year[2]`, `{r} Test.2.0$Year[3]` runs (@tbl-Projections; @fig-Projectioncurves). Current total run timing is estimated to be near `{r} percent((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%mutate(ProjectedTiming=Timing*Weight)%>%summarize(Time=sum(ProjectedTiming)))$Time)`, which yields a total run estimate of **`{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year))))$Total[1],big.mark=",", scientific=F)`** (`{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%mutate(MM=mean(MAAPE))%>%mutate(Lower=Total*(1-(MM/100)), Upper=Total*(1+(MM/100))))$Lower[1], big.mark=",", scientific = F)`-`{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%mutate(MM=mean(MAAPE))%>%mutate(Lower=Total*(1-(MM/100)), Upper=Total*(1+(MM/100))))$Upper[1], big.mark=",", scientific = F)`). Run timing is projected to be `{r} (Test.2.0%>%left_join(Sonar %>%group_by(Year) %>%mutate(Timing = cumsum(Daily.Count / sum(Daily.Count))) %>%filter(Timing >= 0.5) %>%slice_head(n = 1) %>%ungroup() %>%select(Year, Date) %>%arrange(Year) %>%mutate(DateNum = as.numeric(Date),RollingMeanDate = as.Date(rollmean(DateNum, k = 10, align = "right", fill = NA),origin = "1970-01-01"))%>%filter(!is.na(RollingMeanDate))%>%mutate(Timing = round(as.numeric(Date - RollingMeanDate), digits = 0))%>%select(Year,Timing))%>%mutate(Time=mean(Timing), TimingText = case_when(Time < 0 ~ paste0(abs(Time), " days", " early"),Time > 0 ~ paste0(Time, " days", " late "),TRUE       ~ "on time")))$TimingText[1]` relative to the recent 10-year average timing past the RM19 sonar site. Total run projection estimates have averaged `{r} format(mean((Projected.Daily%>%filter(Projection.Date>Yesterday-3))$Weighted.Projection), big.mark = ",", scientific = F)` fish over the last three days (@fig-Modelstability).
 
 ```{r,echo=F}
 #| label: tbl-Projections
@@ -675,23 +703,22 @@ Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Pr
   ungroup()%>%
   select(-Stock)%>%
   left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%
-  select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%
+  left_join(TimingDesignation%>%mutate(Year=as.character(Year)))%>%
+  select(Year,TimingText,Timing,MAAPE,Projection,Weight,Weighted.Projection,Total)%>%
   flextable()%>%
   theme_apa()%>%
   align(align="left",j=1,part="all")%>%
   line_spacing(space=1,part = "all")%>%
-  colformat_double(j=c(2,5),digits=2)%>%
-  mk_par(j = 3, part = "body",value = as_paragraph(as_chunk(Timing, formatter = fmt_pct)))%>%
-  colformat_num(j=c(4,6,7), digits = 0)%>%
+  colformat_double(j=c(4,6),digits=2)%>%
+  mk_par(j = 4, part = "body",value = as_paragraph(as_chunk(Timing, formatter = fmt_pct)))%>%
+  colformat_num(j=c(5,7,8), digits = 0)%>%
   font(fontname="serif",part="all")%>%
-  set_header_labels(Timing="Run timing",Projection="Model projection",Weight="Model weight",Weighted.Projection="Weighted projection")%>%
-  merge_v(j=7)%>%
-  valign(j=7, valign = "bottom")%>%
-  bold(j=7)%>%
+  set_header_labels(Timing="Run timing", TimingText="10-yr timing",Projection="Model projection",Weight="Model weight",Weighted.Projection="Weighted projection")%>%
+  merge_v(j=8)%>%
+  valign(j=8, valign = "bottom")%>%
+  bold(j=8)%>%
   fix_border_issues()%>%
   autofit()
-
-
 
 ```
 
@@ -806,10 +833,6 @@ Projected.Daily%>%DT::datatable(
 
 
 ```
-
-
-
-THIS IS A TEST
 
 
 
