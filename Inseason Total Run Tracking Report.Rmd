@@ -16,6 +16,7 @@ output: html_document
 }
 </style>
 ```
+
 <center>
 
 ### By: Kyle Gatt

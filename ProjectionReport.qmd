@@ -1,5 +1,5 @@
 ---
-title: "Upper Cook Inlet Midpoint Run Projection"
+title: "Late-run Kenai River Sockeye Salmon Run-tier Assessment"
 author: 
   - name: Kyle Gatt
     email: kyle.gatt@alaska.gov
@@ -17,7 +17,7 @@ engine: knitr
 
 <center>
 
-![](ADFG Logo.jpg)
+![](ADFG%20Logo.jpg){width="309"}
 
 *This document is a draft and has not undergone review or approval through the Alaska Department of Fish and Game’s statewide publications system. Its contents are preliminary and subject to change.*
 
@@ -39,6 +39,8 @@ library(zoo)
 library(scales)
 library(flextable)
 library(gghighlight)
+library(TTR)
+library(TSrepr)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
@@ -49,7 +51,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 # This script will replace the "Main" tab in the TR20XXworksheet.xlxs file for total run tracking and projections
 #Step 1: Udate the date for which you are running this report:
 
-Today<-as.Date("2025-09-16",format("%Y-%m-%d"))
+Today<-as.Date("2025-07-16",format("%Y-%m-%d"))
 Yesterday<-Today-1
 Current.Year<-2025
 
@@ -305,3 +307,515 @@ UCI.PU.SF.Cumu<-UCI.PU.SF%>%group_by(Fishery.Project)%>%mutate(Season.Total=cums
 Page1<-rbind(Commercial.Harvest.Cumu,Escapement.Cumu,UCI.PU.SF.Cumu)
 
 ```
+
+# Background
+
+An inseason tier-status assessment is conducted annually for the late-run Kenai River sockeye salmon stock. This assessment provides a projected total run estimate, which informs the tier under which the Alaska Department of Fish and Game (ADF&G) manages the commercial fisheries for the remainder of the season per 5 AAC 21.360 of the *Kenai River Late-Run Sockeye Salmon Management Plan*. The tiers are defined based on total run size: a lower tier corresponds to fewer than 2.3 million fish, a middle tier to a run between 2.3 and 4.6 million fish, and an upper tier to a run exceeding 4.6 million fish (\@tbl-RunTiers). Although the exact date of the tier-status assessment has varied somewhat over the years, it is typically performed around July 20.
+
+Since the assessment was first implemented in Upper Cook Inlet (UCI), projection methods have evolved in response to changes in the fishery and available assessment tools. Prior to 2024, total run projections for the Late-Run stock were based on cumulative catch-per-unit-effort (CPUE) timing curves from the Offshore Test Fishery (OTF). This approach provided unbiased estimates of run timing, as OTF performance is largely unaffected by inseason management actions. Beginning in 2024, however, the OTF project lost its CFEC funding. Consequently, inriver run timing curves from the RM19 sonar project were adopted for projecting the total run of sockeye salmon to the Kenai River with a modeling average approach. Retrospective analyses comparing the inriver-based method to the historical OTF approach showed that both produced similar results with respect to run tier designations. In 2025, further methodological updates were implemented. Stock-specific harvest estimates began to rely on historical, fishery-specific genetic stock identification (GSI) estimates, replacing the previous age-allocation approach. The age-based method assumed that the relative contribution of an age class in a stock's escapement reflected the age composition of commercial harvest within a given time and area (fishery strata) (see Tobias and Willette 2013).
+
+The purpose of this report is to formally document updated projection and inseason harvest estimation methods and to provide an estimate of the total run of Late-run sockeye salmon to the Kenai River in 2025.
+
+```{r, echo=F, message=FALSE, warning=F}
+#| label: tbl-RunTiers
+#| tbl-cap: Management tiers for the late-run stock Kenai River sockeye salmon.
+
+
+data.frame(Tier=c("Lower","Middle","Upper"),Total.Run=c("Less than 2,300,000","2,300,000 to 4,600,000","Greater than 4,600,000"))%>%
+  flextable()%>%
+  theme_apa()%>%
+  set_header_labels(Total.Run="Total run size")%>%
+   line_spacing(space = 1,part = "all")%>%
+  font(fontname="serif",part="all")%>%
+  autofit()
+
+```
+
+# Methods
+
+### Data Inputs
+
+#### Genetic Stock Identification Data
+
+Fishery-specific genetic stock identification estimates spanning 2005 to 2024 were complied from various reports (Barclay, A. W., 2020; Barclay and Chenoweth 2021; Barclay 2024; A. W. Barclay, Fishery Biologist, Alaska Department of Fish and Game, Anchorage, personal communication) into a centralized dataframe for further analysis. The fisheries sampled for GSI analyses have varied over the time series but have generally consisted of four major strata including: Central District Drift, Central District Set Gillnet (ESSN), Northern District, and Westside. When applicable, the average of corridors only and non-corridor GSI estimates were used to represent the Central Distrct Drift area strata. Furthermore, the average of Kalgin Island and Westside GSI estimates were used to represent the Westside area strata because these fisheries are often reported as an aggregate due to low sample sizes and the inability to ensure pure mixtures among these fisheries. Primary stocks represented in GSI analyses include Kenai, Kasilof, Crescent, Susitna rivers, Fish Creek, West Cook Inlet (West), and Knik/Turnagain/Northeast Cook Inlet (KTNE). Genetic stock identification estimates for the West and KTNE reporting groups were aggregated to represent "other" stocks.
+
+#### Commercial Harvest Data
+
+All inseason commercial harvest data was exported from OceanAk's Region 2 - Salmon - Inseason Catch - Mariner 2 database using the following filters: Management Unit Code == "UCI", and Species Code == 420. Historical harvest data used for retrospective analyses was exported from OceanAk's Statewide Fishticket database as annual totals of sockeye salmon harvest by statistical area using the following filters: Management Unit Code == "UCI", Harvest Code /= "21; 22 ;23 ;24; 41; 42; 43", Species Code == 420, Batch year is between 2005 and 2024. Once imported into R, all harvest data were assigned to fishery strata based on statistical area and gear code (@tbl-Fisherystatareas).
+
+```{r, echo=F, message=FALSE, warning=F}
+#| label: tbl-Fisherystatareas
+#| tbl-cap: Statistical areas included within each fishery stratum.
+
+Harvest<-read.csv(file("Data/Harvest/Upper Cook Inlet Historical Harvest.csv"))%>%rename("Year"=Batch.Year)%>%
+  mutate(Fishery=ifelse(Stat.Area%in%c(24741,24742,24743,24710,24720,24730,24790,24780,24770),"Northern District",
+                               ifelse(Stat.Area%in%c(24510,24520,24530,24540,24550,24555,24560,24610,24620)&Gear.Code==4,"Westside",
+                                             ifelse(Stat.Area%in%c(24442,24441,24432,24431,24422,24421),"ESSN",
+                                                                  ifelse(Gear.Code==3,"Central District Drift","Error")))))%>%
+  filter(!Fishery%in%"Error")
+
+# SummarizeHarvest dat
+Harvest.Sum<-Harvest%>%group_by(Year,Fishery)%>%summarize(Harvest=sum(Number.Of.Animals..sum.))
+
+
+Harvest%>%group_by(Fishery)%>%summarize(Stat.Area=as.factor(unique(Stat.Area)))%>%
+  group_by(Fishery)%>%summarize(Stat.Area=paste(Stat.Area, collapse = ", "))%>%
+  flextable()%>%
+  theme_apa()%>%
+  line_spacing(space = 1,part = "all")%>%
+  align(j=1,align="left", part = "all")%>%
+  align(j=2,align="left", part = "all")%>%
+  set_header_labels(values = c("Fishery strata", "Statistical area"))%>%
+  fix_border_issues()%>%
+  autofit()
+```
+
+### Data Analysis
+
+#### Commercial Harvest Stock Apportionment
+
+Stock apportionment of the commercial harvest was performed using a hindcasting approach of historical, fishery-specific GSI data. Realized stock compositions for each fishery were lagged by one year and modeled using 3-, 5-, and 10-year rolling averages as well as exponential smoothing techniques. These simulated stock compositions were then applied to commercial harvest data by year and fishery to produce "inseason" stock-specific harvest estimates. To assess the performance of each simulation method, coefficient of variation (CV) was calculated between simulated and realized stock-specific harvest estimates, stratified by year, stock, and fishery. Coefficient of variation was chosen over other metrics as to ensure a meaningful zero value for fisheries in which a stock was not present in the harvest of a fishery. To account for temporal variation in stock compositions across the season, we incorporated a simplified temporal adjustment into the model by assuming a 50% reduction in the Kenai contribution across all fisheries prior to July 20th. This correction is supported by 2023 GSI data from the Central District Drift harvest, which showed the average Kenai contribution to corridor-only harvests increased from approximately 38% before July 20th to over 72% after July 20th.
+
+The simulation method yielding the lowest average CV over the previous three years was selected as the optimal model for each year-fishery combination. Finally, stock-specific harvest estimates from optimal models were summed across all fisheries to produce a late-run Kenai River specific commercial harvest estimate.
+
+```{r, echo=F, message=FALSE, warning=F}
+
+######## Commercial Harvest #####################
+Harvest<-read.csv(file("Data/Harvest/Upper Cook Inlet Historical Harvest.csv"))%>%rename("Year"=Batch.Year)%>%
+  mutate(Fishery=ifelse(Stat.Area%in%c(24741,24742,24743,24710,24720,24730,24790,24780,24770),"Northern District",
+                               ifelse(Stat.Area%in%c(24510,24520,24530,24540,24550,24555,24560,24610,24620)&Gear.Code==4,"Westside",
+                                             ifelse(Stat.Area%in%c(24442,24441,24432,24431,24422,24421),"ESSN",
+                                                                  ifelse(Gear.Code==3,"Central District Drift","Error")))))%>%
+  filter(!Fishery%in%"Error")
+
+# SummarizeHarvest dat
+Harvest.Sum<-Harvest%>%group_by(Year,Fishery)%>%summarize(Harvest=sum(Number.Of.Animals..sum.))
+
+#######################################
+######### GSI #########################
+#Importing aggregated GSI data
+GSI<-read.csv(file("Data/GSI/GSI.Aggregated.csv"))%>%
+  mutate(Stock=ifelse(Stock%in%"KTNE" | Stock%in%"West","Other",Stock))%>%
+  group_by(Year, Fishery,Stock)%>%summarize(Comp=sum(Comp))
+
+years <- seq(min(GSI$Year, na.rm = TRUE), max(GSI$Year, na.rm = TRUE))
+stocks <- unique(GSI$Stock)
+fisheries <- unique(GSI$Fishery)
+
+
+GSIMeans<-GSI%>%group_by(Fishery,Stock)%>%
+  mutate(Lagged=lag(Comp,1),
+    Roll3=rollmean(Lagged,k=3, fill=NA, na.rm=T, align="right"),
+         Roll5=rollmean(Lagged,k=5, fill=NA, na.rm=T, align="right"),
+         Roll10=rollmean(Lagged,k=10, fill=NA, na.rm=T, align="right"))%>%
+  group_by(Fishery, Stock)%>%
+  fill(c(Roll3,Roll5,Roll10),.direction = "down")%>%
+  left_join(Harvest.Sum)%>%
+  mutate(Harvest=ifelse(Harvest%in%NA,0,Harvest))%>%
+  mutate(True.Harvest=Comp*Harvest,
+         RollHarvest3=Roll3*Harvest,
+         RollHarvest5=Roll5*Harvest,
+         RollHarvest10=Roll10*Harvest)
+
+################################################################################
+# Using an exponential smoothing approach with varying window widths
+  
+GSIEXPO<-GSI%>%
+  group_by(Stock, Fishery)%>%
+  mutate(Lagged=lag(Comp, 1))%>%
+  filter(!is.na(Lagged))%>%
+  group_by(Stock, Fishery)%>%
+  mutate(Smoothed3=EMA(Lagged, n=3),
+         Smoothed5=EMA(Lagged, n=5),
+         Smoothed10=EMA(Lagged, n=10))%>%
+  left_join(Harvest.Sum)%>%
+  mutate(Harvest=ifelse(Harvest%in%NA,0,Harvest))%>%
+  mutate(True.Harvest=Comp*Harvest,
+        Smoothed3Harvest=Smoothed3*Harvest,
+         Smoothed5Harvest=Smoothed5*Harvest,
+         Smoothed10Harvest=Smoothed10*Harvest)%>%#Need to figure out how to add back in ESSN for 24 to then fill down
+  ungroup() %>%
+  complete(
+    Year = years,
+    Fishery = fisheries,
+    Stock = stocks)%>%
+group_by(Fishery, Stock) %>%
+fill(Smoothed3, Smoothed5, Smoothed10, .direction = "downup")
+  
+  
+  
+# Aggregating everything 
+MethodsAgg<-rbind(GSIMeans%>%select(1:3,10:13)%>%rename("Roll 3"=RollHarvest3, "Roll 5"=RollHarvest5,"Roll 10"=RollHarvest10)%>%pivot_longer(5:7,names_to = "Method",values_to = "Total"),
+                  GSIEXPO%>%select(1:3,10:13)%>%rename("Exp 3"=Smoothed3Harvest, "Expo 5"=Smoothed5Harvest,"Expo 10"=Smoothed10Harvest)%>%pivot_longer(5:7,names_to = "Method",values_to = "Total"))%>%
+  
+  select(Year, Fishery, Stock, Method, True.Harvest, Total)%>%
+  
+  ungroup()%>%
+  mutate(Mean=rowMeans(across(c(True.Harvest,Total))))%>% ## Estimating precision
+  rowwise()%>%
+  mutate(SD=sd(c_across(c(True.Harvest,Total))), CV=(SD/Mean))%>%
+  filter(!CV%in%NA)%>%
+  
+  group_by(Stock, Fishery, Method)%>% # Down filling recent performance
+  fill(CV, .direction = "down")%>%
+  
+  group_by(Stock, Fishery, Method)%>%
+  mutate(CVRoll=rollmean(CV, k=3, fill=NA, align = "right", na.rm=T))%>%# Select the lowest average CV over the last three years
+  
+  group_by(Stock, Fishery, Method)%>%
+  fill(CVRoll, .direction = "down")%>%
+  filter(!CVRoll%in%NA)%>%
+  
+  arrange(Year, Fishery, Stock, Method)%>%
+  group_by(Year, Stock, Fishery)%>%
+  mutate(Selected=ifelse(CVRoll==min(CVRoll,na.exclude=T),"Selected","Not Selected"))
+
+
+
+ROLL<-GSIMeans%>%filter(Year==Current.Year-1)%>%select(Fishery,Stock,Roll3,Roll5,Roll10)%>%filter(Stock%in%"Kenai")%>%rename("Fishery.Project"=Fishery)%>%ungroup()%>%select(-Stock)%>%
+  pivot_longer(2:4,values_to = "Composition",names_to = "Method")
+
+EXP<-GSIEXPO%>%filter(Year==Current.Year-1)%>%select(Fishery,Stock,Smoothed3,Smoothed5,Smoothed10)%>%filter(Stock%in%"Kenai")%>%rename("Fishery.Project"=Fishery)%>%ungroup()%>%select(-Stock)%>%
+  pivot_longer(2:4,values_to = "Composition",names_to = "Method")
+
+Methods<-rbind(ROLL,EXP)
+
+Comps<-MethodsAgg%>%filter(Year==Current.Year-1 & Selected%in%"Selected" & Stock%in%"Kenai")%>%ungroup()%>%select(Fishery,Method)%>%rename("Fishery.Project"=Fishery)%>%
+  mutate(Method=recode(Method,"Roll 3"="Roll3", 
+                                          "Roll 5"="Roll5", 
+                                           "Roll 10"="Roll10", 
+                                           "Expo 3" ="Smoothed3", 
+                                           "Expo 5" ="Smoothed5",
+                                           "Expo 10" ="Smoothed10"))%>%
+  left_join(Methods) %>%
+  rbind(Methods%>%filter(Fishery.Project%in%"ESSN" & Method%in%"Roll5")) # MANUALLY ADD ESSN
+
+```
+
+```{r, echo=F, message=FALSE, warning=F}
+#| label: tbl-StockComps
+#| tbl-cap: Simulated stock compositions used to estimate the harvest of late-run Kenai River stock sockeye salmon in Upper Cook Inlet commercial fisheries, 2025.
+
+Comps%>%
+  mutate(Fishery=Fishery.Project, "Composition before July 20th"=Composition*.5,"Composition after July 20th"= Composition)%>%
+  select(Fishery, Method, `Composition before July 20th`,`Composition after July 20th`)%>%
+  flextable()%>%
+  theme_apa()%>%
+  align(j=1:2,align="left", part = "all")%>%
+  align(j=2:4,align="right", part = "all")%>%
+  fix_border_issues()%>%
+  line_spacing(space = 1,part = "all")%>%
+  autofit()
+
+
+```
+
+#### Late-run Kenai River Sockeye Salmon Total Run Projection
+
+Inriver run timing models spanning the years 2000 to 2024 were used to project the total run of sockeye salmon to the Kenai River. Model performance was assessed using the Mean Arctangent Absolute Percentage Error (MAAPE), which compared projected daily total run estimates to actual run values, derived from GIS allocations, up to the date of the projection. The top three run-timing models with the lowest MAAPE were selected for each allocation method and a weighted hybrid model approach was applied. Model weights were assigned based on the running MAAPE of each selected model, with a lower MAAPE receiving a greater weight towards the final projection estimate. Weighted projection estimates among the top three selected were then summed to produce to final total run estimate.
+
+```{r, echo=F, message=FALSE, warning=F}
+######## Sonar #######################
+# Importing Timing Data
+Sonar<-read.csv(file("Data/Escapement/Historical/KeKa_Hist_Sonar.csv"))%>%
+  mutate(Date=as.Date(Date, format="%d-%b"))
+
+Timing<-Sonar%>%
+  filter(Year>=2000)%>%
+  group_by(River,Year)%>%
+  mutate(Timing=cumsum(Daily.Count)/max(cumsum(Daily.Count)))%>%
+  select(-Daily.Count)%>%
+  group_by(River)%>%
+  complete(Year,Date)%>%
+  group_by(River,Year)%>%
+  fill(Timing,.direction = "updown")%>%
+  rename(Stock=River)%>%
+  filter(Stock%in%"Kenai")
+
+
+
+########## Inseason Data ##############
+TRUnallocated<-Page1%>%
+  filter(!Fishery.Project%in%c("Crescent Escapement", "Fish Creek Escapement", "Susitna Escapement", "Other", "Fish Creek Personal Use"))%>%
+  mutate(Fishery.Project=ifelse(Fishery.Project%in%c("Central District Drift - State Waters","UCI EEZ" ),"Central District Drift",
+         ifelse(Fishery.Project%in%c("Northern District Set Net Fishery - Eastern Subdistrict","Northern District Set Net Fishery - General Subdistrict"),"Northern District",
+                ifelse(Fishery.Project%in%c("Kasilof Section Set Net Fishery","Kenai Section Set Net Fishery"),"ESSN",
+                       ifelse(Fishery.Project%in%"Western Subdistrict Set Net Fishery","Westside",Fishery.Project)))))%>%
+  group_by(Fate,Fishery.Project,Date)%>%
+  summarize(Season.Total=sum(Season.Total))%>%
+  filter(!Fishery.Project%in%c("Crescent Escapement", "Fish Creek Escapement", "Susitna Escapement", "Other", 
+            "Fish Creek Personal Use", "Kasilof River Escapement", "Kasilof Sport", "Kasilof Personal Use Gillnet", "Kasilof Personal Use Dipnet"))
+
+
+# Apply stock comps of Kenai fish to commercial harvest but only after July 1
+CommTR.0<-TRUnallocated%>%filter(Fate%in%"Commercial Harvest")%>%
+  left_join(Comps)%>%
+  mutate(Date=as.Date(Date,format="%m/%d/%Y"))%>%
+  
+  mutate(Condition=ifelse(Date<as.Date("2025-07-20",format="%Y-%m-%d") ,"yes","no"))%>%
+  mutate(Composition=ifelse(Condition%in%"yes",Composition*.5,Composition))%>%
+  
+  mutate(Season.Total=Season.Total*Composition)%>%
+  group_by(Date)%>%summarize(Total=sum(Season.Total,na.rm=T))%>%
+  mutate(Total=ifelse(Date<as.Date("2025-07-01",format="%Y-%m-%d") ,Total*0, Total))%>%
+  mutate(Fate="Commercial Harvest")
+
+
+ALt.TR.0<-CommTR.0%>%select(-c(Total,Fate))%>%left_join(
+TRUnallocated%>%mutate(Date=as.Date(Date,format="%m/%d/%Y"))%>%filter(!Fate%in%"Commercial Harvest")%>%group_by(Date)%>%summarize(Total=sum(Season.Total))%>%mutate(Fate="Other"))%>%
+  rbind(CommTR.0)%>%group_by(Date)%>%summarize(Total=sum(Total))
+  
+
+
+# Running projections
+Test.1.0<-Timing%>%
+  filter(Stock%in%"Kenai")%>%
+  left_join(ALt.TR.0)%>%
+              mutate(Projection=Total/Timing)%>% #generating daily projection estimates
+  filter(Date%in%Yesterday)%>% #Filtering to projection date
+  ungroup()%>%
+  select(Year, Projection)%>%
+  left_join(Timing%>%filter(Stock%in%"Kenai"))%>% #combining timing data to estimate daily total run estimates
+  ungroup()%>%
+  mutate(Daily=Timing*Projection)
+
+Test.2.0<-Test.1.0%>%
+  left_join(ALt.TR.0)%>%# Combining true counts
+  filter(Total>0)%>%
+  group_by(Year)%>%summarize(MAAPE=mean(maape(Total,Daily)))%>%
+  slice_min(order_by=MAAPE,n=3)
+
+
+Projected.Daily<- Timing%>%left_join(ALt.TR.0%>%select(Date,Total))%>%mutate(Projection=Total/Timing)%>%filter(Date<=Yesterday)%>%mutate(Projection.Date=Date)%>%
+    select(Stock,Year,Projection.Date,Projection)%>%
+    left_join(Timing,relationship = "many-to-many")%>% #Adding yaer based run timing
+    mutate(Projected.Daily=Timing*Projection)%>%
+    left_join(ALt.TR.0)%>%
+    filter(!Total%in%NA)%>%
+    group_by(Stock,Year,Projection.Date)%>%summarize(MAAPE=mean(maape(Total,Projected.Daily)))%>%arrange(Stock,Projection.Date,MAAPE)%>%
+    group_by(Stock,Projection.Date)%>%slice(1:3)%>%
+left_join(Timing%>%left_join(ALt.TR.0)%>%mutate(Projection=Total/Timing)%>%filter(Date<=Yesterday)%>%
+mutate(Projection.Date=Date)%>%select(Stock,Year,Projection.Date,Projection))%>%
+    mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock,Projection.Date)%>%
+    mutate(Weighted.Projection=sum(((Inv.Weight/sum(Inv.Weight))*Projection)))
+    
+
+```
+
+# Results
+
+### Total Run To Date
+
+An estimated, `{r} format((Page1%>% filter(Date%in%Yesterday)%>% ungroup()%>%summarize(Total=round(sum(Season.Total),digits=0)))$Total,big.mark=",",scientific=F)` sockeye salmon have returned to UCI as of `{r} Yesterday` (@tbl-RuntoDate). The UCI total run to-date is `{r} format(6930000-(Page1%>% filter(Date%in%Yesterday)%>% ungroup()%>%summarize(Total=round(sum(Season.Total),digits=0)))$Total, big.mark=",", scientific=F)` fish below the forecast of 6.93 million.
+
+```{r, echo=F, message=FALSE, warning=F}
+#| label: tbl-RuntoDate
+#| tbl-cap: Season total harvest and passage estimates of Upper Cook Inlet (UCI) sockeye salmon. All personal use and sport harvest estimates are projections based on recent five-year average harvest rates within each fishery. Susitna River escapement is based on the average harvest rate of this stock in UCI commercial salmon fisheries (42%; 2007 to 2015), the average run timing, and pre-season forecasts. Crescent River escapement is based on the commercial sockeye salmon harvest in the western district and average harvest rate of this stock (46.3% from 2006 to 2021) within that fishery.
+
+Page1%>%
+  filter(Date%in%Yesterday)%>%
+  group_by(Fate)%>%mutate(Subtotal=round(sum(Season.Total),digits=0))%>%
+  ungroup()%>%
+  mutate(`Grand total`=round(sum(unique(Subtotal)),digits=0))%>%
+  select(Fate,Fishery.Project,Season.Total,Subtotal,`Grand total`)%>%
+  mutate(Season.Total=round(Season.Total,digits=0))%>%
+  flextable()%>%
+  theme_apa()%>%
+  line_spacing(space = 1)%>%
+  align(j=1:2,align = "left", part = "all")%>%
+  align(j=3,align = "right", part="all")%>%
+  set_header_labels(Season.Total="Harvest/Passage", Fishery.Project="Fishery/Project")%>%
+  merge_v(j=c(1,4,5))%>%
+  valign(j=4:5, valign = "bottom")%>%
+  valign(j=1, valign = "top")%>%
+  colformat_num(j=3:5, digits = 0)%>%
+  bold(j=5, part="body")%>%
+  autofit()
+
+
+```
+
+The Kenai component of the UCI total run is estimated to be `{r} format(round((ALt.TR.0 %>%filter(Date%in%Yesterday))$Total,digits=0), big.mark=",", scientific=F)` sockeye salmon. Of those, `{r} format(round((CommTR.0 %>%filter(Date%in%Yesterday))$Total,digits=0), big.mark=",", scientific=F)` were estimated have been harvested in commercial fisheries in UCI (@fig-KenaiRuntoDate). A total of 4,186,605 sockeye salmon are forecast to return to the Kenai River in 2025.
+
+```{r, echo=F, message=FALSE, warning=F}
+#| label: fig-KenaiRuntoDate
+#| fig-cap: Season total harvest and passage estimates of late-run Kenai River sockeye salmon. All personal use and sport harvest estimates are projections based on recent five-year average harvest rates within each fishery. 
+
+
+Page1%>%
+  filter(Fishery.Project%in%c("Kenai River Escapement", "Kenai Personal Use Dipnet", "Kenai Sport"))%>%
+  rbind(CommTR.0%>%mutate(Season.Total=Total, Fishery.Project="Commercial Harvest")%>%select(Date, Season.Total, Fate, Fishery.Project))%>%
+  filter(Date<Today & Date>=as.Date("2025-07-01",format="%Y-%m-%d"))%>%
+  mutate(`Run component`=Fishery.Project)%>%
+  ggplot()+
+  geom_line(aes(Date,Season.Total,color=`Run component`),size=1)+
+  geom_point(aes(Date,Season.Total,color=`Run component`),size=1)+
+
+  scale_y_continuous(labels = comma)+
+  theme_bw()+
+  ylab("Cumulative season total")+
+  xlab("")+
+  theme(text=element_text(size=12,  family="serif"))
+
+
+```
+
+### Total Run Projection
+
+The 2025 total run timing for late-run Kenai river stock sockeye salmon most closely resembling that of the `{r} Test.2.0$Year[1]`, `{r} Test.2.0$Year[2]`, `{r} Test.2.0$Year[3]` runs (@tbl-Projections; @fig-Projectioncurves). Current total run timing is estimated to be near `{r} percent((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%mutate(ProjectedTiming=Timing*Weight)%>%summarize(Time=sum(ProjectedTiming)))$Time)`, which yields a total run estimate of **`{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year))))$Total[1],big.mark=",", scientific=F)`** (`{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%mutate(MM=mean(MAAPE))%>%mutate(Lower=Total*(1-(MM/100)), Upper=Total*(1+(MM/100))))$Lower[1], big.mark=",", scientific = F)`-`{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%mutate(MM=mean(MAAPE))%>%mutate(Lower=Total*(1-(MM/100)), Upper=Total*(1+(MM/100))))$Upper[1], big.mark=",", scientific = F)`). Total run projection estimates have averaged `{r} format(mean((Projected.Daily%>%filter(Projection.Date>Yesterday-3))$Weighted.Projection), big.mark = ",", scientific = F)` fish over the last three days (@fig-Modelstability).
+
+```{r,echo=F}
+#| label: tbl-Projections
+#| tbl-cap: Top three selected run timing models for projecting the total run of late-run Kenai River stock sockeye salmon. Model performance was assessed usign mean arctangent absolute percentage error (MAAPE) of projected daily total run estimates relative to the true daily total run estimates up to the projection date. Weighted model projections from the top three models were summed to produce a grand total run estimate.
+
+
+Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%
+  mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%
+  mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%
+  ungroup()%>%
+  select(-Stock)%>%
+  left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%
+  select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%
+  flextable()%>%
+  theme_apa()%>%
+  align(align="left",j=1,part="all")%>%
+  line_spacing(space=1,part = "all")%>%
+  colformat_double(j=c(2,5),digits=2)%>%
+  mk_par(j = 3, part = "body",value = as_paragraph(as_chunk(Timing, formatter = fmt_pct)))%>%
+  colformat_num(j=c(4,6,7), digits = 0)%>%
+  font(fontname="serif",part="all")%>%
+  set_header_labels(Timing="Run timing",Projection="Model projection",Weight="Model weight",Weighted.Projection="Weighted projection")%>%
+  merge_v(j=7)%>%
+  valign(j=7, valign = "bottom")%>%
+  bold(j=7)%>%
+  fix_border_issues()%>%
+  autofit()
+
+
+
+```
+
+```{r,echo=F}
+#| label: fig-Projectioncurves
+#| fig-cap: The top three competing models for each stock (black lines) relative to actual daily cumulative total runs (red line). All other competing models are indicated in grey. Management tiers are indicated with dotted black lines.
+
+
+Test.1.0%>%left_join(Test.2.0)%>%mutate(Projection=round(Projection,digits=0))%>%
+  left_join(ALt.TR.0%>%mutate(True.Total=Total))%>%
+  mutate(Upper=ifelse(Stock%in%"Kenai",4600000,NA),Lower=ifelse(Stock%in%"Kenai",2300000,NA))%>%
+  ggplot()+
+  geom_line(aes(Date,True.Total),size=1.25,color=2)+
+    geom_hline(yintercept = 4600000, size=.8, lty=2, alpha=.6)+
+      geom_hline(yintercept = 2300000, size=.8, lty=2, alpha=.6)+
+     annotate("text", x=as.Date("2025-07-04",format="%Y-%m-%d"), y=1500000, label="Lower Tier", alpha=.3)+
+      annotate("text", x=as.Date("2025-07-04",format="%Y-%m-%d"), y=3500000, label="Middle Tier", alpha=.3)+
+     annotate("text", x=as.Date("2025-07-04",format="%Y-%m-%d"), y=6000000, label="Upper Tier", alpha=.3)+
+  geom_line(aes(Date,Daily,group=Year))+
+  gghighlight(Year==Test.2.0$Year, use_direct_label = TRUE,
+              unhighlighted_params = list(linewidth = 1.3, colour = alpha("grey", 0.7)))+
+  geom_line(aes(Date,True.Total),size=1.25,color=2)+
+  scale_y_continuous(labels = comma)+
+  ylab("Total run")+
+  xlab("")+
+  theme_classic()+
+  theme(text=element_text(size=12,  family="serif"))
+
+
+```
+
+```{r,echo=F}
+#| label: fig-Modelstability
+#| fig-cap: Weighted total run estimates (black dots) using the top three selected run timing models by projection date. Grey dots represent individual total run projections for each selected model by date.
+
+   Projected.Daily%>%
+      ggplot()+
+      geom_point(aes(Projection.Date,Projection),alpha=.2)+
+      geom_point(aes(Projection.Date,Weighted.Projection),size=3)+
+      geom_hline(yintercept = 4600000, size=.7, lty=2, alpha=.3)+
+      geom_hline(yintercept = 2300000, size=.7, lty=2, alpha=.3)+
+     annotate("text", x=as.Date("2025-07-02",format="%Y-%m-%d"), y=1500000, label="Lower Tier", alpha=.3)+
+      annotate("text", x=as.Date("2025-07-02",format="%Y-%m-%d"), y=3500000, label="Middle Tier", alpha=.3)+
+     annotate("text", x=as.Date("2025-07-02",format="%Y-%m-%d"), y=6000000, label="Upper Tier", alpha=.3)+
+      scale_y_continuous(labels = comma, breaks=seq(1000000,30000000,2000000))+
+      
+      ylab("Projected total run")+
+      xlab("")+
+      theme_classic()+
+      theme(text=element_text(size=12,  family="serif"))
+  
+```
+
+# Recommendation
+
+Based on the projected total run of `{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year))))$Total[1],big.mark=",", scientific=F)` late-run sockeye salmon to the Kenai River, the ADF&G should follow **`{r} (Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%mutate(Tier=ifelse(Total>4600000, "upper tier",ifelse(Total<=4600000 & Total>=2300000, "middle tier",ifelse(Total<2300000, "lower tier", "we have no idea")))))$Tier[1]`** management actions stipulated in 5 AAC 21.360 of the *Kenai River Late-Run Sockeye Salmon Management Plan* for remainder of the `{r} Current.Year` commercial season.
+
+# References
+
+Barclay, A. W. 2020. Compilation (2005–2019) of genetic stock identification estimates of sockeye salmon harvest from sampled Upper Cook Inlet commercial fisheries; Susitna River components reported both separately and combined. Alaska Department of Fish and Game, Division of Commercial Fisheries, Regional Information Report 5J20-02, Anchorage.
+
+Barclay, A. W., and E. L. Chenoweth. 2021. Genetic stock identification of Upper Cook Inlet sockeye salmon harvest, 2020. Alaska Department of Fish and Game, Division of Commercial Fisheries, Regional Information Report No. 5J21-04, Anchorage.
+
+Barclay, A. W. 2024. Genetic stock composition estimates for the Upper Cook Inlet sockeye salmon commercial fishery, 2021–2023. Alaska Department of Fish and Game, Division of Commercial Fisheries, Regional Information Report No. 5J24-02, Anchorage.
+
+Tobias T. M., and T. M. Willette. 2013. An estimate of total return of sockeye salmon to Upper Cook Inlet. Alaska, 1976–2008. Alaska Department of Fish and Game, Division of Commercial Fisheries, Regional Information Report 2A13-02, Anchorage.
+
+# Appendices
+
+```{r,echo=F}
+#| label: tbl-Page1
+#| tbl-cap: Sockeye salmon total run estimates by date and fishery component, 2025.
+
+Page1%>%DT::datatable(
+          filter = "top",
+          extensions = "Buttons",
+          options = list(dom = 'Bfrtip',
+                         buttons =
+                           list(
+                             'copy',
+                             'print',
+                             list(
+                               extend = 'collection',
+                               buttons = c('csv', 'excel'),
+                               text = 'Download'
+                             )
+                           ))
+        )
+
+
+```
+
+```{r,echo=F}
+#| label: tbl-Modelprojections
+#| tbl-cap: Late-run Kenai river sockeye salmon total run projection estimates by projection date.
+
+Projected.Daily%>%DT::datatable(
+          filter = "top",
+          extensions = "Buttons",
+          options = list(dom = 'Bfrtip',
+                         buttons =
+                           list(
+                             'copy',
+                             'print',
+                             list(
+                               extend = 'collection',
+                               buttons = c('csv', 'excel'),
+                               text = 'Download'
+                             )
+                           ))
+        )
+
+
+```
+
+
+
+THIS IS A TEST
+
+
+
+
+
+
+
+
+
