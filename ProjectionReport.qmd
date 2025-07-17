@@ -51,7 +51,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 # This script will replace the "Main" tab in the TR20XXworksheet.xlxs file for total run tracking and projections
 #Step 1: Udate the date for which you are running this report:
 
-Today<-as.Date("2025-07-16",format("%Y-%m-%d"))
+Today<-as.Date("2025-07-17",format("%Y-%m-%d"))
 Yesterday<-Today-1
 Current.Year<-2025
 
@@ -720,6 +720,16 @@ Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Pr
   fix_border_issues()%>%
   autofit()
 
+
+
+
+
+
+(Test.2.0%>%left_join(Sonar %>%group_by(Year) %>%mutate(Timing = cumsum(Daily.Count / sum(Daily.Count))) %>%filter(Timing >= 0.5) %>%slice_head(n = 1) %>%ungroup() %>%select(Year, Date) %>%arrange(Year) %>%mutate(DateNum = as.numeric(Date),RollingMeanDate = as.Date(rollmean(DateNum, k = 10, align = "right", fill = NA),origin = "1970-01-01"))%>%filter(!is.na(RollingMeanDate))%>%mutate(Timing = round(as.numeric(Date - RollingMeanDate), digits = 0))%>%select(Year,Timing))%>%mutate(Time=mean(Timing), TimingText = case_when(Time < 0 ~ paste0(abs(Time), " days", " early"),Time > 0 ~ paste0(Time, " days", " late "),TRUE       ~ "on time")))$TimingText[1] 
+
+
+
+
 ```
 
 ```{r,echo=F}
@@ -833,12 +843,3 @@ Projected.Daily%>%DT::datatable(
 
 
 ```
-
-
-
-
-
-
-
-
-
