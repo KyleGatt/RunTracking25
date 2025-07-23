@@ -51,7 +51,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 # This script will replace the "Main" tab in the TR20XXworksheet.xlxs file for total run tracking and projections
 #Step 1: Udate the date for which you are running this report:
 
-Today<-as.Date("2025-07-17",format("%Y-%m-%d"))
+Today<-as.Date("2025-07-23",format("%Y-%m-%d"))
 Yesterday<-Today-1
 Current.Year<-2025
 
@@ -374,7 +374,7 @@ Harvest%>%group_by(Fishery)%>%summarize(Stat.Area=as.factor(unique(Stat.Area)))%
 
 #### Commercial Harvest Stock Apportionment
 
-Stock apportionment of the commercial harvest was performed using a hindcasting approach of historical, fishery-specific GSI data. Realized stock compositions for each fishery were lagged by one year and modeled using 3-, 5-, and 10-year rolling averages as well as exponential smoothing techniques. These simulated stock compositions were then applied to commercial harvest data by year and fishery to produce "inseason" stock-specific harvest estimates. To assess the performance of each simulation method, coefficient of variation (CV) was calculated between simulated and realized stock-specific harvest estimates, stratified by year, stock, and fishery. Coefficient of variation was chosen over other metrics as to ensure a meaningful zero value for fisheries in which a stock was not present in the harvest of a fishery. To account for temporal variation in stock compositions across the season, we incorporated a simplified temporal adjustment into the model by assuming a 50% reduction in the Kenai contribution across all fisheries prior to July 20th. This correction is supported by 2023 GSI data from the Central District Drift harvest, which showed the average Kenai contribution to corridor-only harvests increased from approximately 38% before July 20th to over 72% after July 20th.
+Stock apportionment of the commercial harvest was performed using a hindcasting approach of historical, fishery-specific GSI data. Realized stock compositions for each fishery were lagged by one year and modeled using 3-, 5-, and 10-year rolling averages as well as exponential smoothing techniques. These simulated stock compositions were then applied to commercial harvest data by year and fishery to produce "inseason" stock-specific harvest estimates. To assess the performance of each simulation method, coefficient of variation (CV) was calculated between simulated and realized stock-specific harvest estimates, stratified by year, stock, and fishery. Coefficient of variation was chosen over other metrics as to ensure a meaningful zero value for fisheries in which a stock was not present in the harvest of a fishery. To account for temporal variation in stock compositions across the season, we incorporated a simplified temporal adjustment into the model by assuming a 50% reduction in the Kenai contribution across all fisheries prior to July 15th. This correction is supported by 2023 GSI data from the Central District Drift harvest, which showed the average Kenai contribution to corridor-only harvests increased from approximately 35% before July 13th to over 64% after July 17th.
 
 The simulation method yielding the lowest average CV over the previous three years was selected as the optimal model for each year-fishery combination. Finally, stock-specific harvest estimates from optimal models were summed across all fisheries to produce a late-run Kenai River specific commercial harvest estimate.
 
@@ -490,6 +490,8 @@ Comps<-MethodsAgg%>%filter(Year==Current.Year-1 & Selected%in%"Selected" & Stock
   left_join(Methods) %>%
   rbind(Methods%>%filter(Fishery.Project%in%"ESSN" & Method%in%"Roll5")) # MANUALLY ADD ESSN
 
+
+
 ```
 
 ```{r, echo=F, message=FALSE, warning=F}
@@ -497,8 +499,8 @@ Comps<-MethodsAgg%>%filter(Year==Current.Year-1 & Selected%in%"Selected" & Stock
 #| tbl-cap: Simulated stock compositions used to estimate the harvest of late-run Kenai River stock sockeye salmon in Upper Cook Inlet commercial fisheries, 2025.
 
 Comps%>%
-  mutate(Fishery=Fishery.Project, "Composition before July 20th"=Composition*.5,"Composition after July 20th"= Composition)%>%
-  select(Fishery, Method, `Composition before July 20th`,`Composition after July 20th`)%>%
+  mutate(Fishery=Fishery.Project, "Composition before July 15th"=Composition*.5,"Composition after July 15th"= Composition)%>%
+  select(Fishery, Method, `Composition before July 15th`,`Composition after July 15th`)%>%
   flextable()%>%
   theme_apa()%>%
   align(j=1:2,align="left", part = "all")%>%
@@ -580,9 +582,14 @@ CommTR.0<-TRUnallocated%>%filter(Fate%in%"Commercial Harvest")%>%
   left_join(Comps)%>%
   mutate(Date=as.Date(Date,format="%m/%d/%Y"))%>%
   
-  mutate(Condition=ifelse(Date<as.Date("2025-07-20",format="%Y-%m-%d") ,"yes","no"))%>%
+  ###############################################################################
+  ######################### ADJUST SO YOU SEE FIT ###############################
+  mutate(Condition=ifelse(Date<as.Date("2025-07-15",format="%Y-%m-%d") ,"yes","no"))%>%
   mutate(Composition=ifelse(Condition%in%"yes",Composition*.5,Composition))%>%
-  
+  ###############################################################################
+  ###############################################################################
+
+
   mutate(Season.Total=Season.Total*Composition)%>%
   group_by(Date)%>%summarize(Total=sum(Season.Total,na.rm=T))%>%
   mutate(Total=ifelse(Date<as.Date("2025-07-01",format="%Y-%m-%d") ,Total*0, Total))%>%
@@ -611,6 +618,7 @@ Test.2.0<-Test.1.0%>%
   left_join(ALt.TR.0)%>%# Combining true counts
   filter(Total>0)%>%
   group_by(Year)%>%summarize(MAAPE=mean(maape(Total,Daily)))%>%
+  arrange(MAAPE)%>%
   slice_min(order_by=MAAPE,n=3)
 
 
@@ -627,6 +635,7 @@ mutate(Projection.Date=Date)%>%select(Stock,Year,Projection.Date,Projection))%>%
     mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock,Projection.Date)%>%
     mutate(Weighted.Projection=sum(((Inv.Weight/sum(Inv.Weight))*Projection)))
     
+
 
 ```
 
@@ -690,11 +699,11 @@ Page1%>%
 
 ### Total Run Projection
 
-The 2025 total run timing for late-run Kenai river stock sockeye salmon most closely resembling that of the `{r} Test.2.0$Year[1]`, `{r} Test.2.0$Year[2]`, `{r} Test.2.0$Year[3]` runs (@tbl-Projections; @fig-Projectioncurves). Current total run timing is estimated to be near `{r} percent((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%mutate(ProjectedTiming=Timing*Weight)%>%summarize(Time=sum(ProjectedTiming)))$Time)`, which yields a total run estimate of **`{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year))))$Total[1],big.mark=",", scientific=F)`** (`{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%mutate(MM=mean(MAAPE))%>%mutate(Lower=Total*(1-(MM/100)), Upper=Total*(1+(MM/100))))$Lower[1], big.mark=",", scientific = F)`-`{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%mutate(MM=mean(MAAPE))%>%mutate(Lower=Total*(1-(MM/100)), Upper=Total*(1+(MM/100))))$Upper[1], big.mark=",", scientific = F)`). Run timing is projected to be `{r} (Test.2.0%>%left_join(Sonar %>%group_by(Year) %>%mutate(Timing = cumsum(Daily.Count / sum(Daily.Count))) %>%filter(Timing >= 0.5) %>%slice_head(n = 1) %>%ungroup() %>%select(Year, Date) %>%arrange(Year) %>%mutate(DateNum = as.numeric(Date),RollingMeanDate = as.Date(rollmean(DateNum, k = 10, align = "right", fill = NA),origin = "1970-01-01"))%>%filter(!is.na(RollingMeanDate))%>%mutate(Timing = round(as.numeric(Date - RollingMeanDate), digits = 0))%>%select(Year,Timing))%>%mutate(Time=mean(Timing), TimingText = case_when(Time < 0 ~ paste0(abs(Time), " days", " early"),Time > 0 ~ paste0(Time, " days", " late "),TRUE       ~ "on time")))$TimingText[1]` relative to the recent 10-year average timing past the RM19 sonar site. Total run projection estimates have averaged `{r} format(mean((Projected.Daily%>%filter(Projection.Date>Yesterday-3))$Weighted.Projection), big.mark = ",", scientific = F)` fish over the last three days (@fig-Modelstability).
+The 2025 total run timing for late-run Kenai river stock sockeye salmon most closely resembling that of the `{r} Test.2.0$Year[1]`, `{r} Test.2.0$Year[2]`, `{r} Test.2.0$Year[3]` runs (@tbl-Projections; @fig-Projectioncurves). Current total run timing is estimated to be near `{r} percent((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%mutate(ProjectedTiming=Timing*Weight)%>%summarize(Time=sum(ProjectedTiming)))$Time)`, which yields a total run estimate of **`{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year))))$Total[1],big.mark=",", scientific=F)`** (`{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%mutate(MM=mean(MAAPE))%>%mutate(Lower=Total*(1-(MM/100)), Upper=Total*(1+(MM/100))))$Lower[1], big.mark=",", scientific = F)`-`{r} format((Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%mutate(Inv.Weight=1/MAAPE)%>%group_by(Stock)%>%mutate(Weight=Inv.Weight/sum(Inv.Weight),Weighted.Projection=Projection*Weight,Total=sum(Weighted.Projection))%>%mutate(Year=as.character(Year))%>%select(-Inv.Weight)%>%ungroup()%>%select(-Stock)%>%left_join(Timing%>%filter(Stock%in%"Kenai")%>%filter(Date%in%Yesterday)%>%ungroup()%>%select(-Stock,-Date)%>%mutate(Year=as.character(Year)))%>%select(Year,MAAPE,Timing,Projection,Weight,Weighted.Projection,Total)%>%mutate(MM=mean(MAAPE))%>%mutate(Lower=Total*(1-(MM/100)), Upper=Total*(1+(MM/100))))$Upper[1], big.mark=",", scientific = F)`). Run timing is projected to be `{r} (Test.2.0%>%left_join(Sonar %>%group_by(Year) %>%mutate(Timing = cumsum(Daily.Count / sum(Daily.Count))) %>%filter(Timing >= 0.5) %>%slice_head(n = 1) %>%ungroup() %>%select(Year, Date) %>%arrange(Year) %>%mutate(DateNum = as.numeric(Date),RollingMeanDate = as.Date(rollmean(DateNum, k = 10, align = "right", fill = NA),origin = "1970-01-01")) %>%filter(!is.na(RollingMeanDate)) %>%mutate(Timing = round(as.numeric(Date - RollingMeanDate), digits = 0))%>%select(Year, Timing))%>%mutate(Timing.Proj=mean(Timing))%>%mutate(TimingText= case_when(Timing < 0 ~ paste0(round(abs(Timing.Proj),digits = 0), " days", " early"),Timing > 0 ~ paste0(round(abs(Timing.Proj),digits = 0), " days", " late"),TRUE ~ "on time")))$TimingText[1]` relative to the recent 10-year average timing past the RM19 sonar site. Total run projection estimates have averaged `{r} format(mean((Projected.Daily%>%filter(Projection.Date>Yesterday-3))$Weighted.Projection), big.mark = ",", scientific = F)` fish over the last three days (@fig-Modelstability).
 
 ```{r,echo=F}
 #| label: tbl-Projections
-#| tbl-cap: Top three selected run timing models for projecting the total run of late-run Kenai River stock sockeye salmon. Model performance was assessed usign mean arctangent absolute percentage error (MAAPE) of projected daily total run estimates relative to the true daily total run estimates up to the projection date. Weighted model projections from the top three models were summed to produce a grand total run estimate.
+#| tbl-cap: Top three selected run timing models for projecting the total run of late-run Kenai River stock sockeye salmon. Model performance was assessed using mean arctangent absolute percentage error (MAAPE) of projected daily total run estimates relative to the true daily total run estimates up to the projection date. Weighted model projections from the top three models were summed to produce a grand total run estimate.
 
 
 Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Projection))%>%
@@ -710,7 +719,7 @@ Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Pr
   align(align="left",j=1,part="all")%>%
   line_spacing(space=1,part = "all")%>%
   colformat_double(j=c(4,6),digits=2)%>%
-  mk_par(j = 4, part = "body",value = as_paragraph(as_chunk(Timing, formatter = fmt_pct)))%>%
+  mk_par(j = 3, part = "body",value = as_paragraph(as_chunk(Timing, formatter = fmt_pct)))%>%
   colformat_num(j=c(5,7,8), digits = 0)%>%
   font(fontname="serif",part="all")%>%
   set_header_labels(Timing="Run timing", TimingText="10-yr timing",Projection="Model projection",Weight="Model weight",Weighted.Projection="Weighted projection")%>%
@@ -719,14 +728,6 @@ Test.2.0%>%left_join(Test.1.0%>%filter(Date%in%Yesterday)%>%select(Stock,Year,Pr
   bold(j=8)%>%
   fix_border_issues()%>%
   autofit()
-
-
-
-
-
-
-(Test.2.0%>%left_join(Sonar %>%group_by(Year) %>%mutate(Timing = cumsum(Daily.Count / sum(Daily.Count))) %>%filter(Timing >= 0.5) %>%slice_head(n = 1) %>%ungroup() %>%select(Year, Date) %>%arrange(Year) %>%mutate(DateNum = as.numeric(Date),RollingMeanDate = as.Date(rollmean(DateNum, k = 10, align = "right", fill = NA),origin = "1970-01-01"))%>%filter(!is.na(RollingMeanDate))%>%mutate(Timing = round(as.numeric(Date - RollingMeanDate), digits = 0))%>%select(Year,Timing))%>%mutate(Time=mean(Timing), TimingText = case_when(Time < 0 ~ paste0(abs(Time), " days", " early"),Time > 0 ~ paste0(Time, " days", " late "),TRUE       ~ "on time")))$TimingText[1] 
-
 
 
 
